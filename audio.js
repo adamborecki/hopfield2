@@ -105,13 +105,12 @@ export class HopfieldAudio {
     const active = state.map((value) => value > 0);
 
     if (!this.started) {
-      this.active = active;
+      this.active = active.map(() => false);
       return;
     }
 
     if (this.arpMode === "arpeggio") {
-      this.releaseChordVoices(active);
-      this.active = active;
+      this.releaseChordVoices([]);
       return;
     }
 

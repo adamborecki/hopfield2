@@ -1,6 +1,6 @@
-import { HopfieldNetwork } from "./network.js";
-import { HopfieldAudio } from "./audio.js";
-import { createHopfieldViz } from "./viz.js";
+import { HopfieldNetwork } from "./network.js?v=3";
+import { HopfieldAudio } from "./audio.js?v=3";
+import { createHopfieldViz } from "./viz.js?v=3";
 
 const app = document.getElementById("app");
 const startButton = document.getElementById("startButton");
@@ -99,6 +99,8 @@ createHopfieldViz({
 initialize();
 
 function initialize() {
+  settings.arpMode = getSelectedArpMode();
+  audio.setArpMode(settings.arpMode);
   network.randomize();
   syncScale();
   syncPitchStrip();
@@ -175,9 +177,7 @@ function bindEvents() {
   document.querySelectorAll('input[name="arpMode"]').forEach((radio) => {
     radio.addEventListener("change", () => {
       if (radio.checked) {
-        settings.arpMode = radio.value;
-        audio.setArpMode(settings.arpMode);
-        applyNetworkState([]);
+        syncArpModeFromControl(true);
       }
     });
   });
@@ -199,6 +199,7 @@ function bindEvents() {
 async function startExperience() {
   startButton.disabled = true;
   startButton.textContent = "Starting...";
+  syncArpModeFromControl(false);
 
   try {
     await audio.start({
@@ -208,6 +209,9 @@ async function startExperience() {
     });
     audio.setArpRate(settings.updateRate);
     audio.setArpMode(settings.arpMode);
+    if (settings.arpMode === "arpeggio") {
+      audio.allNotesOff();
+    }
     network.randomize();
     applyNetworkState(network.state.map((_, index) => index));
     pushEnergy();
@@ -322,6 +326,19 @@ function syncReadouts() {
   readouts.delay.textContent = settings.delay.toFixed(2);
   readouts.autoPerturb.textContent = settings.autoPerturb === 0 ? "off" : `${settings.autoPerturb}s`;
   readouts.volume.textContent = settings.volume.toFixed(2);
+}
+
+function getSelectedArpMode() {
+  return document.querySelector('input[name="arpMode"]:checked')?.value || settings.arpMode;
+}
+
+function syncArpModeFromControl(applyState) {
+  settings.arpMode = getSelectedArpMode();
+  audio.setArpMode(settings.arpMode);
+
+  if (applyState) {
+    applyNetworkState([]);
+  }
 }
 
 function setSettingsOpen(open) {
