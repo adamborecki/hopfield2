@@ -52,7 +52,7 @@ const settings = {
   delay: 0.18,
   autoPerturb: 0,
   volume: 0.72,
-  arpMode: "chord",
+  arpMode: "arpeggio",
 };
 
 const network = new HopfieldNetwork(settings);
