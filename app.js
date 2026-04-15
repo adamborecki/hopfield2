@@ -130,6 +130,7 @@ function bindEvents() {
 
   controls.updateRate.addEventListener("input", () => {
     settings.updateRate = Number(controls.updateRate.value);
+    audio.setArpRate(settings.updateRate);
     syncReadouts();
   });
 
@@ -205,6 +206,7 @@ async function startExperience() {
       pitchNames: network.pitchNames,
       semitones: network.semitones,
     });
+    audio.setArpRate(settings.updateRate);
     audio.setArpMode(settings.arpMode);
     network.randomize();
     applyNetworkState(network.state.map((_, index) => index));

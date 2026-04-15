@@ -272,11 +272,11 @@ h1 {
 }
 
 .settings-panel {
-  left: max(14px, env(safe-area-inset-left));
+  right: max(14px, env(safe-area-inset-right));
 }
 
 .learn-panel {
-  right: max(14px, env(safe-area-inset-right));
+  left: max(14px, env(safe-area-inset-left));
 }
 
 .panel[aria-hidden="true"] {

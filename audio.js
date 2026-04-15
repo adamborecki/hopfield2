@@ -14,6 +14,7 @@ export class HopfieldAudio {
     this.activeState = [];
     this.arpIndex = 0;
     this.arpMode = settings.arpMode || "chord";
+    this.arpRate = settings.updateRate ?? 5;
     this.effectSettings = {
       reverb: settings.reverb ?? 0.38,
       delay: settings.delay ?? 0.18,
@@ -48,7 +49,7 @@ export class HopfieldAudio {
       volume: -14,
     }).connect(this.voiceBus);
 
-    this.arpLoop = new Tone.Loop((time) => this.playArpStep(time), "8n");
+    this.arpLoop = new Tone.Loop((time) => this.playArpStep(time), this.getArpInterval());
     this.arpLoop.start(0);
     Tone.Transport.bpm.value = 72;
     Tone.Transport.start();
@@ -156,7 +157,23 @@ export class HopfieldAudio {
     const frequency = this.frequencies[index];
 
     if (frequency) {
-      this.arpSynth.triggerAttackRelease(frequency, "8n", time, 0.42);
+      this.arpSynth.triggerAttackRelease(frequency, this.getArpNoteLength(), time, 0.42);
+    }
+  }
+
+  getArpInterval() {
+    return Math.max(0.075, Math.min(2, 1 / this.arpRate));
+  }
+
+  getArpNoteLength() {
+    return Math.max(0.05, Math.min(0.7, this.getArpInterval() * 0.72));
+  }
+
+  setArpRate(rate) {
+    this.arpRate = Math.max(0.5, Math.min(16, Number(rate) || 5));
+
+    if (this.arpLoop) {
+      this.arpLoop.interval = this.getArpInterval();
     }
   }
 
