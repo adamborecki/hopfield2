@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Hopfield Harmonics</title>
+    <meta
+      name="description"
+      content="A musical Hopfield network that settles into harmonic attractor states."
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
+    <script src="https://unpkg.com/tone@14.8.49/build/Tone.js"></script>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main id="app" class="app-shell" data-started="false">
+      <div id="viz" aria-hidden="true"></div>
+
+      <div class="top-controls" aria-label="controls">
+        <button id="settingsToggle" class="icon-button" type="button" aria-label="Open settings">
+          &#9881;
+        </button>
+        <button id="learnToggle" class="icon-button" type="button" aria-label="Open learn mode">
+          ?
+        </button>
+      </div>
+
+      <section id="startOverlay" class="start-overlay">
+        <div class="start-copy">
+          <p class="eyebrow">Hopfield Harmonics</p>
+          <h1>Tap to begin</h1>
+          <p>
+            A neural memory tuned by consonance. It settles, sings, and changes when you
+            shake it.
+          </p>
+          <button id="startButton" class="primary-button" type="button">Start audio</button>
+        </div>
+      </section>
+
+      <div id="gesturePad" class="gesture-pad" role="button" tabindex="0" aria-label="Grab and wiggle">
+        <span>grab &amp; wiggle</span>
+      </div>
+
+      <div id="gestureReadout" class="gesture-readout" aria-live="polite">
+        <span>x <strong id="readoutX">0.50</strong></span>
+        <span>y <strong id="readoutY">0.50</strong></span>
+        <span>velocity <strong id="readoutVelocity">0.00</strong></span>
+        <span>energy injected <strong id="readoutEnergy">0</strong></span>
+      </div>
+
+      <aside id="settingsPanel" class="panel settings-panel" aria-label="Settings" aria-hidden="true">
+        <div class="panel-heading">
+          <p class="eyebrow">Settings</p>
+          <button id="closeSettings" class="text-button" type="button">close</button>
+        </div>
+
+        <label class="field">
+          <span>Mode / tuning</span>
+          <select id="modeSelect">
+            <option value="12tet">12-tone equal temperament</option>
+            <option value="diatonic">7-note diatonic</option>
+            <option value="just">just intonation</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Update rate <output id="updateRateValue">5 Hz</output></span>
+          <input id="updateRate" type="range" min="0.5" max="16" value="5" step="0.5" />
+        </label>
+
+        <label class="field">
+          <span>Consonance strength <output id="consonanceValue">1.00</output></span>
+          <input id="consonance" type="range" min="0.1" max="2" value="1" step="0.05" />
+        </label>
+
+        <label class="field">
+          <span>Temperature <output id="temperatureValue">0.03</output></span>
+          <input id="temperature" type="range" min="0" max="0.6" value="0.03" step="0.01" />
+        </label>
+
+        <label class="field">
+          <span>Reverb amount <output id="reverbValue">0.38</output></span>
+          <input id="reverb" type="range" min="0" max="0.9" value="0.38" step="0.01" />
+        </label>
+
+        <label class="field">
+          <span>Delay amount <output id="delayValue">0.18</output></span>
+          <input id="delay" type="range" min="0" max="0.75" value="0.18" step="0.01" />
+        </label>
+
+        <label class="field">
+          <span>Auto-perturb <output id="autoPerturbValue">off</output></span>
+          <input id="autoPerturb" type="range" min="0" max="60" value="0" step="1" />
+        </label>
+
+        <fieldset class="field radio-field">
+          <legend>Arpeggiate mode</legend>
+          <label><input type="radio" name="arpMode" value="chord" checked /> chord</label>
+          <label><input type="radio" name="arpMode" value="arpeggio" /> arpeggio</label>
+        </fieldset>
+
+        <label class="field">
+          <span>Master volume <output id="volumeValue">0.72</output></span>
+          <input id="volume" type="range" min="0" max="1" value="0.72" step="0.01" />
+        </label>
+      </aside>
+
+      <aside id="learnPanel" class="panel learn-panel" aria-label="Learn mode" aria-hidden="true">
+        <div class="panel-heading">
+          <p class="eyebrow">Learn mode</p>
+          <button id="closeLearn" class="text-button" type="button">close</button>
+        </div>
+        <p>
+          Each point is a pitch class. A glowing point is sounding; a dim point is quiet.
+        </p>
+        <p>
+          Lines are musical preferences. Warm lines pull notes toward consonance. Cool lines
+          push against tense intervals.
+        </p>
+        <p>
+          Each update asks one node whether flipping would lower the global energy. When the
+          network stops changing, it has found an attractor.
+        </p>
+        <p>
+          Wiggle the square to inject energy. The network falls away from one memory and
+          settles into another.
+        </p>
+        <button id="stepButton" class="primary-button secondary" type="button">
+          Step one update
+        </button>
+      </aside>
+
+      <section class="status-strip" aria-label="Network status">
+        <div>
+          <span>Energy</span>
+          <strong id="energyValue">0.00</strong>
+        </div>
+        <div class="meter">
+          <span id="energyMeter"></span>
+        </div>
+        <div>
+          <span>State</span>
+          <strong id="stabilityValue">waiting</strong>
+        </div>
+      </section>
+
+      <section id="pitchStrip" class="pitch-strip" aria-label="Active pitches"></section>
+    </main>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
